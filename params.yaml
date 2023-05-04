@@ -1,0 +1,26 @@
+crystal:
+  name: "YbYLF"
+  T: 300                  # temperature [K]
+  index_o: 1.45
+  index_e: 1.47
+  doping_level: 10.0      # doping level [%]
+  cation_density: 1.4e22
+  caxis: [1.0, 0.0, 0.0]
+  shape: "brewster" # "cuboid" or "brewster"
+  W: 2.5
+  H: 2.5
+  L: 7.5
+
+beam:
+  distribution: "tophat"   # valid inputs: "gauss", "tophat"
+  wl: 1020.0              # excitation wavelength
+  k: [0.0, 0.0, 1.0]      # vector specifying the beam direction
+  d: 0.5                  # beam diameter
+  p0: [1.25, 1.25, 5.25]  # point where the beam passes
+  E: [1.0, 0.0, 0.0]      # polarization
+
+simulation:
+  N: 1e3      # number of simulated fluorescence rays
+  step: 1.0   # step size in ray tracing [mm]
+  max_ref_count: 0    # max reflection counts to stop ray tracing (0 => infinity)
+  pump_depletion: true     # false => no pump depletion (uniform excitation), true => pump delete (Beer-Lambert law)
