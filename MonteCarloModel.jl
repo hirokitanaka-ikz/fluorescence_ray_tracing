@@ -59,23 +59,13 @@ function create_isotropic_crystal(W, H, L, n, θ, T, conc, name)::Crystal_isotro
 end
 
 
-# define uniaxial crystal (correction factor x1.15)
-function create_uniaxial_crystal(W, H, L, caxis, no, ne, θ, T, conc, name)::Crystal_uniaxial
-    λ_vector, If_π, If_σ, σabs_π, σabs_σ = load_spectra_uniaxial(name, T)
-    α_π::Vector{Float64} = σabs_π * conc * 1.15  # [cm^-1]
-    α_σ::Vector{Float64} = σabs_σ * conc * 1.15 # [cm^-1]
-    p_planes::Tuple = ([0, 0, 0], [W, 0, 0], [0, 0, 0], [0, H, 0], [0, 0, 0], [0, 0, L])
-    plane_normals::Tuple = ([1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [-cos(θ), 0, sin(θ)], [cos(θ), 0, -sin(θ)])
-    return Crystal_uniaxial(W, H, L, caxis, no, ne, θ, T, conc, λ_vector, If_π, If_σ, α_π, α_σ, p_planes, plane_normals)
-end
-
 # using YAML
 function create_uniaxial_crystal(params_crystal)::Crystal_uniaxial
     name = params_crystal["name"]
     T = params_crystal["T"]
     no = params_crystal["index_o"]
     ne = params_crystal["index_e"]
-    conc = params_crystal["cation_density"] * params_crystal["doping_level"] * 1.15
+    conc = params_crystal["cation_density"] * params_crystal["doping_level"] * 1.15 / 100
     W = params_crystal["W"]
     H = params_crystal["H"]
     L = params_crystal["L"]
