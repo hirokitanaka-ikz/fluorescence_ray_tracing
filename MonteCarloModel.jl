@@ -50,12 +50,12 @@ end
 
 
 # define isotropic crystal
-function create_isotropic_crystal(W, H, L, n, θ, T, conc, name)::Crystal_isotropic
+function create_isotropic_crystal(W, H, L, n, θ, T, conc, name, QE, alpha_b)::Crystal_isotropic
     λ_vector, If, σabs = load_spectra_isotropic(name, T)
     α::Vector{Float64} = σabs * conc    # [cm^-1]
     p_planes::Tuple = ([0, 0, 0], [W, 0, 0], [0, 0, 0], [0, H, 0], [0, 0, 0], [0, 0, L])
     plane_normals::Tuple = ([1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [-cos(θ), 0, sin(θ)], [cos(θ), 0, -sin(θ)])
-    return Crystal_isotropic(W, H, L, n, θ, T, conc, λ_vector, If, α, p_planes, plane_normals)
+    return Crystal_isotropic(W, H, L, n, θ, T, conc, λ_vector, If, α, p_planes, plane_normals, QE, alpha_b)
 end
 
 
@@ -70,6 +70,8 @@ function create_uniaxial_crystal(params_crystal)::Crystal_uniaxial
     H = params_crystal["H"]
     L = params_crystal["L"]
     caxis = params_crystal["caxis"]
+    QE = params_crystal["QE"]
+    alpha_b = params_crystal["alpha_b"]
     if params_crystal["shape"] == "cuboid"
         θ = 0.5π
     elseif params_crystal["shape"] == "brewster"
@@ -82,7 +84,7 @@ function create_uniaxial_crystal(params_crystal)::Crystal_uniaxial
     α_σ::Vector{Float64} = σabs_σ * conc
     p_planes::Tuple = ([0, 0, 0], [W, 0, 0], [0, 0, 0], [0, H, 0], [0, 0, 0], [0, 0, L])
     plane_normals::Tuple = ([1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [-cos(θ), 0, sin(θ)], [cos(θ), 0, -sin(θ)])
-    return Crystal_uniaxial(W, H, L, caxis, no, ne, θ, T, conc, λ_vector, If_π, If_σ, α_π, α_σ, p_planes, plane_normals)
+    return Crystal_uniaxial(W, H, L, caxis, no, ne, θ, T, conc, λ_vector, If_π, If_σ, α_π, α_σ, p_planes, plane_normals, QE, alpha_b)
 end
 
 
@@ -377,18 +379,19 @@ function ray_tracing!(ray::Ray, crystal, Δd::Float64, max_count)::Bool
     while ray.Nr < max_count
         flag::Bool = false
         t, normal = find_intersection(ray, crystal)
-        if t == Inf
-            return false    # if error happens (no intersection), return false
-        end
         N = div(t, Δd)
         if N != 0
             for i in 1:N
                 if judge_absorbed(ray, crystal, Δd)
                     # if absorbed
-                    redirect!(ray)
-                    reset_wavelength!(ray, crystal)
-                    flag = true
-                    break
+                    if judge_reemit(ray, crystal)
+                        redirect!(ray)
+                        reset_wavelength!(ray, crystal)
+                        flag = true
+                        break
+                    else
+                        return false    # disappear
+                    end
                 else
                     # if not absorbed
                     forward!(ray, Δd)
@@ -398,8 +401,12 @@ function ray_tracing!(ray::Ray, crystal, Δd::Float64, max_count)::Bool
         if !flag
             if judge_absorbed(ray, crystal, t - Δd * N)
                 # if absorbed
-                redirect!(ray)
-                reset_wavelength!(ray, crystal)
+                if judge_reemit(ray, crystal)
+                    redirect!(ray)
+                    reset_wavelength!(ray, crystal)
+                else
+                    return false    # disappear
+                end
             else
                 # if not absorbed
                 forward!(ray, t - N * Δd - SMALL)   # forward ray to a plane
@@ -412,7 +419,7 @@ function ray_tracing!(ray::Ray, crystal, Δd::Float64, max_count)::Bool
             end
         end
     end
-    return true     # if no error, return true
+    return true     # ray escapes
 end
 
 
@@ -432,6 +439,19 @@ function judge_detected(ray::Ray, cosine_corrector::CosineCorrector)::Bool
             if rand() <= val
                 return true
             end
+        end
+    end
+    return false
+end
+
+
+# judge if the laser cooling ion reemits (internal quantum efficiency)
+function judge_reemit(ray::Ray, crystal)::Bool
+    αr = get_absorption_coefficient(ray, crystal) # [cm^-1]
+    ηabs = αr / (αr + crystal.αb)
+    if rand() <= ηabs
+        if rand() <= crystal.QE
+            return true
         end
     end
     return false

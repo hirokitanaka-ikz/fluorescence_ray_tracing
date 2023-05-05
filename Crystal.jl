@@ -11,6 +11,8 @@ struct Crystal_isotropic
     α::Vector{Float64}        # vector of absorption coefficient [cm^-1]
     p_planes::Tuple{Vector{Float64}, Vector{Float64}, Vector{Float64}, Vector{Float64}, Vector{Float64}, Vector{Float64}}   # points (arbitrary) on each plane (order is 1:x=0, 2:x=W, 3:y=0, 4:y=H, 5:z=0, 6:z=L)
     plane_normals::Tuple{Vector{Float64}, Vector{Float64}, Vector{Float64}, Vector{Float64}, Vector{Float64}, Vector{Float64}}  # normal vector of each palen
+    QE::Float64     # internal quantum efficiency
+    αb::Float64     # background absorption coefficient [cm^-1]
 end
 
 
@@ -31,4 +33,6 @@ struct Crystal_uniaxial
     α_σ::Vector{Float64}        # vector of absorption coefficient for σ-polarization [cm^-1]
     p_planes::Tuple{Vector{Float64}, Vector{Float64}, Vector{Float64}, Vector{Float64}, Vector{Float64}, Vector{Float64}}   # points (arbitrary) on each plane (order is 1:x=0, 2:x=W, 3:y=0, 4:y=H, 5:z=0, 6:z=L)
     plane_normals::Tuple{Vector{Float64}, Vector{Float64}, Vector{Float64}, Vector{Float64}, Vector{Float64}, Vector{Float64}}  # normal vector of each palen
+    QE::Float64     # internal quantum efficiency
+    αb::Float64     # background absorption coefficient [cm^-1]
 end
