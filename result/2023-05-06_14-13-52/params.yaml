@@ -1,6 +1,6 @@
 crystal:
-  num_axes: 1             # number of individual optical axes, 1 -> isotropic, 2 -> uniaxial, 3 -> biaxial
-  name: "YbKYF"           # name of crystal
+  num_axes: 2             # number of individual optical axes, 1 -> isotropic, 2 -> uniaxial, 3 -> biaxial
+  name: "YbYLF"           # name of crystal
   T: 300                  # temperature [K]
   index_1: 1.45           # first refractive index, no
   index_2: 1.47           # second refractive index ne

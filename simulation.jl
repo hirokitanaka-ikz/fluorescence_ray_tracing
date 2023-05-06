@@ -22,7 +22,7 @@ end
 
 
 function simulation(params)
-    crystal = create_uniaxial_crystal(params["crystal"])
+    crystal = create_crystal(params["crystal"])
     beam = create_beam(params["beam"], crystal)
     N::Int64 = params["simulation"]["N"]
     Δd = params["simulation"]["step"]

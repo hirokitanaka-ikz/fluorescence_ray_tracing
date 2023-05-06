@@ -49,8 +49,37 @@ function load_spectra_uniaxial(name::String, T::Int64)::Tuple
 end
 
 
+function create_crystal(params_crystal)
+    if params_crystal["num_axes"] == 1
+        return create_isotropic_crystal(params_crystal)
+    elseif params_crystal["num_axes"] == 2
+        return create_uniaxial_crystal(params_crystal)
+    # elseif params_crystal["num_axes"] == 3
+    #     return create_biaxial_crystal(params_crystal)
+    else
+        prinln("Number of axes has to be 1, 2, or 3!")
+    end
+end
+
+
 # define isotropic crystal
-function create_isotropic_crystal(W, H, L, n, θ, T, conc, name, QE, alpha_b)::Crystal_isotropic
+function create_isotropic_crystal(params_crystal)::Crystal_isotropic
+    name = params_crystal["name"]
+    T = params_crystal["T"]
+    n = params_crystal["index_1"]
+    conc = params_crystal["cation_density"] * params_crystal["doping_level"] * 1.15 / 100
+    W = params_crystal["W"]
+    H = params_crystal["H"]
+    L = params_crystal["L"]
+    QE = params_crystal["QE"]
+    alpha_b = params_crystal["alpha_b"]
+    if params_crystal["shape"] == "cuboid"
+        θ = 0.5π
+    elseif params_crystal["shape"] == "brewster"
+        θ = atan(ne)
+    else
+        println("crystal's shape is neither 'cuboid' nor 'brewster'!")
+    end
     λ_vector, If, σabs = load_spectra_isotropic(name, T)
     α::Vector{Float64} = σabs * conc    # [cm^-1]
     p_planes::Tuple = ([0, 0, 0], [W, 0, 0], [0, 0, 0], [0, H, 0], [0, 0, 0], [0, 0, L])
@@ -58,13 +87,12 @@ function create_isotropic_crystal(W, H, L, n, θ, T, conc, name, QE, alpha_b)::C
     return Crystal_isotropic(W, H, L, n, θ, T, conc, λ_vector, If, α, p_planes, plane_normals, QE, alpha_b)
 end
 
-
-# using YAML
+# define uniaxial crystal
 function create_uniaxial_crystal(params_crystal)::Crystal_uniaxial
     name = params_crystal["name"]
     T = params_crystal["T"]
-    no = params_crystal["index_o"]
-    ne = params_crystal["index_e"]
+    no = params_crystal["index_1"]
+    ne = params_crystal["index_2"]
     conc = params_crystal["cation_density"] * params_crystal["doping_level"] * 1.15 / 100
     W = params_crystal["W"]
     H = params_crystal["H"]
@@ -94,6 +122,7 @@ function find_intersection(r::Vector{Float64}, k::Vector{Float64}, crystal)::Tup
     intersections = [r + t * k for t in t_list if abs(t) != Inf]
     return intersections[1], intersections[2]
 end
+
 
 # define beam
 function create_beam(params_beam, crystal)::Beam
@@ -127,6 +156,22 @@ end
 
 
 # generate random wavelength from spectrum
+function get_fluorescence_wavelength(E::Vector{Float64}, crystal::Crystal_isotropic)::Float64
+    λ = crystal.λ_vector
+    spectrum = crystal.If
+    spectrum /= maximum(spectrum)
+    f = LinearInterpolation(λ, spectrum)
+    while true
+        λrand = rand(Uniform(λ[1], λ[end]))
+        Ifrand = rand()
+        if Ifrand < f(λrand)
+            return λrand
+        end
+    end
+end
+
+
+# generate random wavelength from spectrum
 function get_fluorescence_wavelength(E::Vector{Float64}, crystal::Crystal_uniaxial)::Float64
     θ = acos( abs( dot(E, crystal.caxis) ) )
     coeff_π = cos(θ) / (cos(θ) + sin(θ))
@@ -134,7 +179,7 @@ function get_fluorescence_wavelength(E::Vector{Float64}, crystal::Crystal_uniaxi
     λ = crystal.λ_vector
     spectrum = coeff_π * crystal.If_π + coeff_σ * crystal.If_σ
     spectrum /= maximum(spectrum)
-    f = LinearInterpolation(crystal.λ_vector, spectrum)
+    f = LinearInterpolation(λ, spectrum)
     while true
         λrand = rand(Uniform(λ[1], λ[end]))
         Ifrand = rand()
@@ -169,18 +214,6 @@ function rotate_vector(r::Vector{Float64}, k::Vector{Float64})
 end
 
 
-# # generate ray (in uniaxial crystal), uniform distribution
-# function generate_ray(crystal::Crystal_uniaxial, beam::Beam, pump_depletion:Bool)::Ray
-#     k = generate_random_vector()
-#     E = generate_perpendicular_vector(k)
-#     λ = get_fluorescence_wavelength(E, crystal)
-#     if !pump_depletion
-#         # uniform generation
-#         r = beam.p1 + beam.k * beam.path_length * rand()    # uniform generation
-#     return Ray(r, k, E, λ)
-# end
-
-
 function get_ray_position(crystal, beam::Beam, pump_depletion::Bool)::Vector{Float64}
     if pump_depletion
         # Beer-Lambert law
@@ -205,6 +238,7 @@ function get_ray_position(crystal, beam::Beam, pump_depletion::Bool)::Vector{Flo
     r_rotated = rotate_vector(r, beam.k)
     return r_rotated
 end
+
 
 # generate ray
 function generate_ray(crystal, beam::Beam, pump_depletion::Bool)::Ray
@@ -243,7 +277,7 @@ end
 
 
 # reset wavelength of ray
-function reset_wavelength!(ray::Ray, crystal::Crystal_uniaxial)
+function reset_wavelength!(ray::Ray, crystal)
     ray.λ = get_fluorescence_wavelength(ray.E, crystal)
 end
 
@@ -255,7 +289,7 @@ function reflect!(ray::Ray, normal::Vector{Float64})
 end
 
 
-# transmission of ray at a plane perpendicular to vector normal (isotropic crystal)
+# redirect the transmitted ray using Snell's law (isotropic crystal)
 function transmit!(ray::Ray, crystal::Crystal_isotropic, normal::Vector{Float64})
     θi = acos(dot(-normal, ray.k) / (norm(normal) * norm(ray.k)))   # indicent angle
     if θi < SMALL
@@ -268,20 +302,28 @@ function transmit!(ray::Ray, crystal::Crystal_isotropic, normal::Vector{Float64}
 end
 
 
-# transmission of ray at a plane perpendicular to vector normal (uniaxial crystal)
+# redirect the transmitted ray using Snell's law (uniaxial crystal)
 function transmit!(ray::Ray, crystal::Crystal_uniaxial, normal::Vector{Float64})
     θi = acos(dot(-normal, ray.k) / (norm(normal) * norm(ray.k)))   # indicent angle
     if θi < SMALL
         return ki
     end
-    θo = asin(crystal.no * sin(θi))          # angle of refraction (Snell's law) using the average refractive index
+    n_ave = 0.5 * (crystal.no + crystal.ne)
+    θo = asin(n_ave * sin(θi))          # angle of refraction (Snell's law) using the average refractive index
     Δθ = θo - θi
     l = normalize( normal - dot(ray.k, normal) * ray.k )
     ray.k = ray.k * cos(Δθ) + l * sin(Δθ)
 end
 
 
-# get absorption coefficient for fluorescence ray in cm^-1
+# get absorption coefficient for fluorescence ray in cm^-1 (isotropic crystal)
+function get_absorption_coefficient(ray::Ray, crystal::Crystal_isotropic)::Float64
+    f = LinearInterpolation(crystal.λ_vector, crystal.α)
+    return f(ray.λ)
+end
+
+
+# get absorption coefficient for fluorescence ray in cm^-1 (uniaxial crystal)
 function get_absorption_coefficient(ray::Ray, crystal::Crystal_uniaxial)::Float64
     θ = acos( abs( dot(ray.E, crystal.caxis) ) )
     coeff_π = cos(θ) / (cos(θ) + sin(θ))
@@ -292,7 +334,14 @@ function get_absorption_coefficient(ray::Ray, crystal::Crystal_uniaxial)::Float6
 end
 
 
-# get absorption coefficient for excitation beam in cm^-1
+# get absorption coefficient for excitation beam in cm^-1 (isotropic crystal)
+function get_absorption_coefficient(beam, crystal::Crystal_isotropic)::Float64
+    f = LinearInterpolation(crystal.λ_vector, crystal.α)
+    return f(beam.λ)
+end
+
+
+# get absorption coefficient for excitation beam in cm^-1 (uniaxial crystal)
 function get_absorption_coefficient(beam, crystal::Crystal_uniaxial)::Float64
     θ = acos( abs( dot(beam.E, crystal.caxis) ) )
     coeff_π = cos(θ) / (cos(θ) + sin(θ))
@@ -303,7 +352,7 @@ function get_absorption_coefficient(beam, crystal::Crystal_uniaxial)::Float64
 end
 
 
-# boolean function to judge if ray is absorbed (true if absorbed)
+# judge if ray is absorbed (true if absorbed)
 function judge_absorbed(ray::Ray, crystal, d::Float64)::Bool
     α = get_absorption_coefficient(ray, crystal)
     A = 1 - exp( -0.1α * d)     # probability to be absorbed while propagating a distance d [mm] *α is in [cm^-1]
@@ -330,7 +379,7 @@ function get_reflectivity(ray::Ray, crystal::Crystal_isotropic, normal::Vector{F
 end
 
 
-# reflectivity of ray at a given plane
+# reflectivity of ray at a given plane (uniaxial)
 function get_reflectivity(ray::Ray, crystal::Crystal_uniaxial, normal::Vector{Float64})::Float64
     θ = acos( abs( dot(ray.E, crystal.caxis) ) )    # angle of polarization with respect to c-axis
     ratio_e = cos(θ) / (cos(θ) + sin(θ))
