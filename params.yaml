@@ -3,7 +3,7 @@ crystal:
   name: "YbKYF"           # name of crystal
   T: 300                  # temperature [K]
   index_1: 1.45           # first refractive index, no
-  index_2: 1.47           # second refractive index ne
+  index_2:                # second refractive index ne
   index_3:                # refractive index for E||c (or E||Z) (only used for biaxial crystal)
   doping_level: 10.0      # doping level [%]
   cation_density: 1.4e22  # cation density of host [cm^-3]

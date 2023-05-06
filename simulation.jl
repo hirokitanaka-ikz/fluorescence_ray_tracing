@@ -58,7 +58,7 @@ function simulation(params)
         end
     end
     Nesc = size(df_all, 1)
-    println("fraction of escaping rays: $Nesc / $N")
+    println("fraction of escaping rays: $Nesc / $N => Fluorescence escape efficiency = $(Nesc / N * 100)%")
     println("*****Simulation end*****")
     return df_all
 end
