@@ -308,8 +308,8 @@ function transmit!(ray::Ray, crystal::Crystal_uniaxial, normal::Vector{Float64})
     if θi < SMALL
         return ki
     end
-    n_ave = 0.5 * (crystal.no + crystal.ne)
-    θo = asin(n_ave * sin(θi))          # angle of refraction (Snell's law) using the average refractive index
+    n = minimum([crystal.no, crystal.ne])
+    θo = asin(n * sin(θi))          # angle of refraction (Snell's law) using the average refractive index
     Δθ = θo - θi
     l = normalize( normal - dot(ray.k, normal) * ray.k )
     ray.k = ray.k * cos(Δθ) + l * sin(Δθ)
