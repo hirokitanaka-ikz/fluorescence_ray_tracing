@@ -66,7 +66,7 @@ end
 function create_isotropic_crystal(params_crystal)::Crystal_isotropic
     name = params_crystal["name"]
     T = params_crystal["T"]
-    n = params_crystal["index_1"]
+    n = params_crystal["n1"]
     conc = params_crystal["cation_density"] * params_crystal["doping_level"] * 1.15 / 100
     W = params_crystal["W"]
     H = params_crystal["H"]
@@ -91,8 +91,8 @@ end
 function create_uniaxial_crystal(params_crystal)::Crystal_uniaxial
     name = params_crystal["name"]
     T = params_crystal["T"]
-    no = params_crystal["index_1"]
-    ne = params_crystal["index_2"]
+    no = params_crystal["n1"]
+    ne = params_crystal["n2"]
     conc = params_crystal["cation_density"] * params_crystal["doping_level"] * 1.15 / 100
     W = params_crystal["W"]
     H = params_crystal["H"]
