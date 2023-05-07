@@ -6,7 +6,6 @@
     x=Float64[], y=Float64[], z=Float64[], kx=Float64[], ky=Float64[], kz=Float64[])
 
     i::Int64 = 0
-
     for i in range(1, n_cycle)
         ray = generate_ray(crystal, beam, pump_depletion)   # generate a ray
         escape = ray_tracing!(ray, crystal, Δd, max_ref_count)   # ray tracing until ray escapes (no_error == true if no error)
