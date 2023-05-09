@@ -36,3 +36,10 @@ Julia of v.1.8 or later is required. For installation of Julia, please visit the
    ```
 6. Once the simulation finishes it creates a directory "result" and sub-folder named with the time-stamp containing a CSV file and param.yaml.
 7. You can generate a report in pdf by running "report.ipynb".
+
+
+## Licence
+[MIT](https://github.com/hirokitanaka-ikz/fluorescence_ray_tracing/master/LICENCE)
+
+
+[hirokitanaka-ikz](https://github.com/hirokitanaka-ikz)
