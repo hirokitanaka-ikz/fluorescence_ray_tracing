@@ -42,4 +42,8 @@ Julia of v.1.8 or later is required. For installation of Julia, please visit the
 [MIT](https://github.com/hirokitanaka-ikz/fluorescence_ray_tracing/master/LICENCE)
 
 
+## Reference
+[1]Hiroki Tanaka, ...
+
+
 [hirokitanaka-ikz](https://github.com/hirokitanaka-ikz)
