@@ -103,7 +103,7 @@ function create_uniaxial_crystal(params_crystal)::Crystal_uniaxial
     if params_crystal["shape"] == "cuboid"
         θ = 0.5π
     elseif params_crystal["shape"] == "brewster"
-        θ = atan(ne)
+        θ = atan(n)
     else
         println("crystal's shape is neither 'cuboid' nor 'brewster'!")
     end
