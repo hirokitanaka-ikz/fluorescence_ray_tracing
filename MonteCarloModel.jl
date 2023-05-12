@@ -13,38 +13,26 @@ SMALL = 1e-8    # small value to avoid errors due to floating point
 
 # load fluorescence and absorption spectra of an isotropic crystal
 function load_spectra_isotropic(name::String, T::Int64)::Tuple
-    filepath = "spectra/$(name)_$(T)K.txt"
-    try
-        global df = CSV.read(filepath, header=0, delim="\t", DataFrame)
-    catch
-        print("File not found: $filepath \n")
-    end
+    filepath = "spectra/$(name)_$(T)K.csv"
+    df = CSV.read(filepath, header=1, DataFrame)
     λ_vector::Vector{Float64} = df[:,1]
     If::Vector{Float64} = df[:,2]
-    σabs::Vector{Float64} = df[:,4]
+    σabs::Vector{Float64} = df[:,3]
     return λ_vector, If, σabs
 end
 
 
 # load fluorescence and absorption spectra of an uniaxial crystal
 function load_spectra_uniaxial(name::String, T::Int64)::Tuple
-    filepath_π = "spectra/$(name)_pi_$(T)K.txt"
-    filepath_σ = "spectra/$(name)_sigma_$(T)K.txt"
-    try
-        global df_π = CSV.read(filepath_π, header=0, delim="\t", DataFrame)
-    catch
-        print("File not found: $filepath_π \n")
-    end
-    try
-        global df_σ = CSV.read(filepath_σ, header=0, delim="\t", DataFrame)
-    catch
-        print("File not found: $filepath_σ \n")
-    end
+    filepath_π = "spectra/$(name)_pi_$(T)K.csv"
+    filepath_σ = "spectra/$(name)_sigma_$(T)K.csv"
+    df_π = CSV.read(filepath_π, header=1, DataFrame)
+    df_σ = CSV.read(filepath_σ, header=1, DataFrame)
     λ_vector::Vector{Float64} = df_π[:,1]
     If_π::Vector{Float64} = df_π[:,2]
     If_σ::Vector{Float64} = df_σ[:,2]
-    σabs_π::Vector{Float64} = df_π[:,4] # [cm^2]
-    σabs_σ::Vector{Float64} = df_σ[:,4] # [cm^2]
+    σabs_π::Vector{Float64} = df_π[:,3] # [cm^2]
+    σabs_σ::Vector{Float64} = df_σ[:,3] # [cm^2]
     return λ_vector, If_π, If_σ, σabs_π, σabs_σ
 end
 
@@ -504,4 +492,4 @@ function judge_reemit(ray::Ray, crystal)::Bool
         end
     end
     return false
-end
+end;
