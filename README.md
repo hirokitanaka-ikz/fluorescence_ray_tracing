@@ -5,7 +5,7 @@ These simulation codes are to simulate the mean fluorescence wavelength and fluo
 ## Description
 - All the parameters for simulation are written in "params.yaml".
 - The simulation requires spectroscopic data of the crystal. The spectroscpic data need to be in the directory "spectra" in the tab-separeted txt. The first column is wavelength in nm, the second column is the fluorescence intensity normalized to 1, the fourth column is the absorption cross section in cm^2.
-- The file name of the spectroscopic data needs to be named as "{crystal name}\_{temperature}K.txt" for isotropic crystals. For uniaxial crystals, two files for two polarizations are needed and they should be named as "{crystal name}\_{"sigma" or "pi"}\_{temperature}K.txt".
+- The file name of the spectroscopic data needs to be named as "{crystal name}\_{temperature}K.csv" for isotropic crystals. For uniaxial crystals, two files for two polarizations are needed and they should be named as "{crystal name}\_{"sigma" or "pi"}\_{temperature}K.csv".
 
 
 ## Requirement
