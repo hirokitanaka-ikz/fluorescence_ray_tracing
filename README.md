@@ -25,8 +25,11 @@ Julia of v.1.8 or later is required. For installation of Julia, please visit the
 3. import packages: CSV, DataFrames, YAML, Distributions, Interpolations
    ```julia
    pkg>add [package name]
-   
-   alternative: import Pkg; Pkg.add("packagename")
+   ```
+   or
+   ```
+   julia>import Pkg
+   julia>Pkg.add("[packagename]")
    ```
 4. include "main.jl"
    ```julia
