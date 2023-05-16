@@ -22,7 +22,7 @@ Julia of v.1.8 or later is required. For installation of Julia, please visit the
    ```shell
    >julia -p 3
    ```
-3. import packages: CSV, DataFrames, YAML, Distributions, Interpolations
+3. Import packages: CSV, DataFrames, YAML, Distributions, Interpolations
    ```julia
    pkg>add [package name]
    ```
@@ -31,7 +31,7 @@ Julia of v.1.8 or later is required. For installation of Julia, please visit the
    julia>import Pkg
    julia>Pkg.add("[packagename]")
    ```
-4. include "main.jl"
+4. Include "main.jl"
    ```julia
    include("main.jl")
    ```
@@ -41,7 +41,6 @@ Julia of v.1.8 or later is required. For installation of Julia, please visit the
    ```
 6. Once the simulation finishes it creates a directory "result" and sub-folder named with the time-stamp containing a CSV file and param.yaml.
 7. You can generate a report in pdf by running "report.ipynb".
-
 
 ## Licence
 [MIT](https://github.com/hirokitanaka-ikz/fluorescence_ray_tracing/master/LICENCE)
