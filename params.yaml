@@ -9,7 +9,7 @@ crystal:
   cation_density: 1.4e22  # cation density of host [cm^-3]
   baxis:                  # vector specifying b(or Y)-axis (only used for biaxial crystal)
   caxis: [1.0, 0.0, 0.0]  # vector specifying c(or Z)-axis (not used for isotropic crystal)
-  shape: "cuboid"         # "cuboid" or "brewster"
+  shape: "cuboid"         # "cuboid" or "brewster". Brewster-cut assumes a beam propagating along z-axis
   W: 2.5                  # width (along x)
   H: 2.5                  # height (along y)
   L: 7.5                  # length (along z)
