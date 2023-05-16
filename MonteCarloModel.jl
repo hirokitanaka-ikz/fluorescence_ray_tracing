@@ -391,7 +391,7 @@ function get_reflectivity(ray::Ray, crystal::Crystal_uniaxial, normal::Vector{Fl
     if θi > asin(1 / crystal.ne)
         Re = 1.0
     else
-        θo = asin(crystal.no * sin(θi))      # Snell's law
+        θo = asin(crystal.ne * sin(θi))      # Snell's law
         m = cross(ray.k, normal)            # vector normal to incident plane
         θpol = acos(abs(dot(ray.E, m)))    # angle between E and m
         ratio_Es = cos(θpol) / (cos(θpol) + sin(θpol))
