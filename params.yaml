@@ -2,8 +2,8 @@ crystal:
   num_axes: 2             # number of individual optical axes, 1 -> isotropic, 2 -> uniaxial, 3 -> biaxial
   name: "YbYLF"           # name of crystal
   T: 300                  # temperature [K]
-  n1: 1.45                # first refractive index, no
-  n2: 1.47                # second refractive index ne
+  n1: 1.45                # first refractive index, no in the case of crystal
+  n2: 1.47                # second refractive index ne in the case of uniaxial crystal (not used for isotropic crystal)
   n3:                     # refractive index for E||c (or E||Z) (only used for biaxial crystal)
   doping_level: 10.0      # doping level [%]
   cation_density: 1.4e22  # cation density of host [cm^-3]
