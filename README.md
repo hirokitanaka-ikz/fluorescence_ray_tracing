@@ -18,7 +18,7 @@ Julia of v.1.8 or later is required. For installation of Julia, please visit the
    ```shell
    >julia
    ```
-   For running Julia in multi-processes. The following is in the case of 3 worker processes, sot there will be 4 processes including 1 master process.
+   The following is to run Julia with three additional worker processes, so there will be 4 processes including 1 master process. The code will split the computational task equally to the existing worker processes.
    ```shell
    >julia -p 3
    ```
