@@ -55,7 +55,7 @@ function create_isotropic_crystal(params_crystal)::Crystal_isotropic
     name = params_crystal["name"]
     T = params_crystal["T"]
     n = params_crystal["n1"]
-    conc = params_crystal["cation_density"] * params_crystal["doping_level"] / 100
+    conc = params_crystal["cation_density"] * params_crystal["doping_level"] * params_crystal["correction_coeff"] / 100
     W = params_crystal["W"]
     H = params_crystal["H"]
     L = params_crystal["L"]
@@ -68,10 +68,11 @@ function create_isotropic_crystal(params_crystal)::Crystal_isotropic
     else
         println("crystal's shape is neither 'cuboid' nor 'brewster'!")
     end
+    ϕ = params_crystal["angle"] / 180 * π
     λ_vector, If, σabs = load_spectra_isotropic(name, T)
     α::Vector{Float64} = σabs * conc    # [cm^-1]
     p_planes::Tuple = ([0, 0, 0], [W, 0, 0], [0, 0, 0], [0, H, 0], [0, 0, 0], [0, 0, L])
-    plane_normals::Tuple = ([1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [-cos(θ), 0, sin(θ)], [cos(θ), 0, -sin(θ)])
+    plane_normals::Tuple = ([1, 0, 0], [-sin(ϕ), -cos(ϕ), 0], [0, 1, 0], [0, -1, 0], [-cos(θ), 0, sin(θ)], [cos(θ), 0, -sin(θ)])
     return Crystal_isotropic(W, H, L, n, θ, T, conc, λ_vector, If, α, p_planes, plane_normals, QE, alpha_b)
 end
 
@@ -81,7 +82,7 @@ function create_uniaxial_crystal(params_crystal)::Crystal_uniaxial
     T = params_crystal["T"]
     no = params_crystal["n1"]
     ne = params_crystal["n2"]
-    conc = params_crystal["cation_density"] * params_crystal["doping_level"] * 1.15 / 100
+    conc = params_crystal["cation_density"] * params_crystal["doping_level"] * params_crystal["correction_coeff"] / 100
     W = params_crystal["W"]
     H = params_crystal["H"]
     L = params_crystal["L"]
@@ -95,11 +96,12 @@ function create_uniaxial_crystal(params_crystal)::Crystal_uniaxial
     else
         println("crystal's shape is neither 'cuboid' nor 'brewster'!")
     end
+    ϕ = params_crystal["angle"] / 180 * π
     λ_vector, If_π, If_σ, σabs_π, σabs_σ = load_spectra_uniaxial(name, T)
     α_π::Vector{Float64} = σabs_π * conc
     α_σ::Vector{Float64} = σabs_σ * conc
     p_planes::Tuple = ([0, 0, 0], [W, 0, 0], [0, 0, 0], [0, H, 0], [0, 0, 0], [0, 0, L])
-    plane_normals::Tuple = ([1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [-cos(θ), 0, sin(θ)], [cos(θ), 0, -sin(θ)])
+    plane_normals::Tuple = ([1, 0, 0], [-sin(ϕ), -cos(ϕ), 0], [0, 1, 0], [0, -1, 0], [-cos(θ), 0, sin(θ)], [cos(θ), 0, -sin(θ)])
     return Crystal_uniaxial(W, H, L, caxis, no, ne, θ, T, conc, λ_vector, If_π, If_σ, α_π, α_σ, p_planes, plane_normals, QE, alpha_b)
 end
 

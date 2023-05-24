@@ -6,10 +6,12 @@ crystal:
   n2: 1.47                # second refractive index ne in the case of uniaxial crystal (not used for isotropic crystal)
   n3:                     # refractive index for E||c (or E||Z) (only used for biaxial crystal)
   doping_level: 10.0      # doping level [%]
+  correction_coeff: 1.15  # correction coefficient for abs. coefficient (>1 if the actual abs. coefficient is larger than the values calculated using cross section and doping level)
   cation_density: 1.4e22  # cation density of host [cm^-3]
   baxis:                  # vector specifying b(or Y)-axis (only used for biaxial crystal)
   caxis: [1.0, 0.0, 0.0]  # vector specifying c(or Z)-axis (not used for isotropic crystal)
   shape: "cuboid"         # "cuboid" or "brewster". Brewster-cut assumes a beam propagating along z-axis
+  angle: 90               # corner angle for reducing the symmetry of the crystal (deg.)
   W: 2.5                  # width (along x)
   H: 2.5                  # height (along y)
   L: 7.5                  # length (along z)
@@ -25,7 +27,7 @@ beam:
   E: [1.0, 0.0, 0.0]      # polarization
 
 simulation:
-  N: 1e3                  # number of simulated fluorescence rays
+  N: 1e6                  # number of simulated fluorescence rays
   step: 0.5               # step size in ray tracing [mm]
   max_ref_count: 0        # max reflection counts to stop ray tracing (0 => infinity)
   pump_depletion: true    # false => no pump depletion (uniform excitation), true => pump delete (Beer-Lambert law)
