@@ -4,17 +4,17 @@ These simulation codes are to simulate the mean fluorescence wavelength and fluo
 
 ## Description
 - All the parameters for simulation are written in "params.yaml".
-- The simulation requires spectroscopic data of the crystal. The spectroscpic data need to be in the directory "spectra" in the tab-separeted txt. The first column is wavelength in nm, the second column is the fluorescence intensity normalized to 1, the fourth column is the absorption cross section in cm^2.
+- The simulation requires spectroscopic data of the crystal. The spectroscpic data need to be in the directory "spectra" in CSV format. The first column is wavelength in nm, the second column is the normalized fluorescence intensity, and the third column is the absorption cross section in cm^2.
 - The file name of the spectroscopic data needs to be named as "{crystal name}\_{temperature}K.csv" for isotropic crystals. For uniaxial crystals, two files for two polarizations are needed and they should be named as "{crystal name}\_{"sigma" or "pi"}\_{temperature}K.csv".
 
 
 ## Requirement
-Julia of v.1.8 or later is required. For installation of Julia, please visit the homepage of Julia: https://julialang.org/downloads/
+Julia of v.1.8 or later is recommended (we developped the codes under v.1.8.3). For installation of Julia, please visit the homepage of Julia: https://julialang.org/downloads/
 
 
 ## Quick start guide
 1. Edit "params.yaml"
-2. Run Julia
+2. Run Julia (in shell)
    ```shell
    >julia
    ```
@@ -43,11 +43,11 @@ Julia of v.1.8 or later is required. For installation of Julia, please visit the
 7. You can generate a report in pdf by running "report.ipynb".
 
 ## Licence
-[MIT](https://github.com/hirokitanaka-ikz/fluorescence_ray_tracing/master/LICENCE)
+[MIT](https://github.com/hirokitanaka-ikz/fluorescence_ray_tracing/main/LICENCE)
 
 
 ## Reference
-[1]Hiroki Tanaka, ...
+[1] Hiroki Tanaka, Stefan Püschel, ...
 
 
 [hirokitanaka-ikz](https://github.com/hirokitanaka-ikz)
