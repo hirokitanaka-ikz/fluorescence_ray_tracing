@@ -13,6 +13,7 @@ struct Crystal_isotropic
     plane_normals::Tuple{Vector{Float64}, Vector{Float64}, Vector{Float64}, Vector{Float64}, Vector{Float64}, Vector{Float64}}  # normal vector of each palen
     QE::Float64     # internal quantum efficiency
     αb::Float64     # background absorption coefficient [cm^-1]
+    αs::Float64     # scattering coefficient [cm^-1]
 end
 
 
@@ -35,4 +36,5 @@ struct Crystal_uniaxial
     plane_normals::Tuple{Vector{Float64}, Vector{Float64}, Vector{Float64}, Vector{Float64}, Vector{Float64}, Vector{Float64}}  # normal vector of each palen
     QE::Float64     # internal quantum efficiency
     αb::Float64     # background absorption coefficient [cm^-1]
+    αs::Float64     # scattering coefficient [cm^-1]
 end

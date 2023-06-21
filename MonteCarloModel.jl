@@ -61,6 +61,7 @@ function create_isotropic_crystal(params_crystal)::Crystal_isotropic
     L = params_crystal["L"]
     QE = params_crystal["QE"]
     alpha_b = params_crystal["alpha_b"]
+    alpha_s = params_crystal["alpha_s"]
     if params_crystal["shape"] == "cuboid"
         θ = 0.5π
     elseif params_crystal["shape"] == "brewster"
@@ -73,7 +74,7 @@ function create_isotropic_crystal(params_crystal)::Crystal_isotropic
     α::Vector{Float64} = σabs * conc    # [cm^-1]
     p_planes::Tuple = ([0, 0, 0], [W, 0, 0], [0, 0, 0], [0, H, 0], [0, 0, 0], [0, 0, L])
     plane_normals::Tuple = ([1, 0, 0], [-sin(ϕ), -cos(ϕ), 0], [0, 1, 0], [0, -1, 0], [-cos(θ), 0, sin(θ)], [cos(θ), 0, -sin(θ)])
-    return Crystal_isotropic(W, H, L, n, θ, T, conc, λ_vector, If, α, p_planes, plane_normals, QE, alpha_b)
+    return Crystal_isotropic(W, H, L, n, θ, T, conc, λ_vector, If, α, p_planes, plane_normals, QE, alpha_b, alpha_s)
 end
 
 # define uniaxial crystal
@@ -89,6 +90,7 @@ function create_uniaxial_crystal(params_crystal)::Crystal_uniaxial
     caxis = params_crystal["caxis"]
     QE = params_crystal["QE"]
     alpha_b = params_crystal["alpha_b"]
+    alpha_s = params_crystal["alpha_s"]
     if params_crystal["shape"] == "cuboid"
         θ = 0.5π
     elseif params_crystal["shape"] == "brewster"
@@ -102,7 +104,7 @@ function create_uniaxial_crystal(params_crystal)::Crystal_uniaxial
     α_σ::Vector{Float64} = σabs_σ * conc
     p_planes::Tuple = ([0, 0, 0], [W, 0, 0], [0, 0, 0], [0, H, 0], [0, 0, 0], [0, 0, L])
     plane_normals::Tuple = ([1, 0, 0], [-sin(ϕ), -cos(ϕ), 0], [0, 1, 0], [0, -1, 0], [-cos(θ), 0, sin(θ)], [cos(θ), 0, -sin(θ)])
-    return Crystal_uniaxial(W, H, L, caxis, no, ne, θ, T, conc, λ_vector, If_π, If_σ, α_π, α_σ, p_planes, plane_normals, QE, alpha_b)
+    return Crystal_uniaxial(W, H, L, caxis, no, ne, θ, T, conc, λ_vector, If_π, If_σ, α_π, α_σ, p_planes, plane_normals, QE, alpha_b, alpha_s)
 end
 
 
@@ -342,10 +344,17 @@ function get_absorption_coefficient(beam, crystal::Crystal_uniaxial)::Float64
 end
 
 
-# judge if ray is absorbed (true if absorbed)
+# judge if ray is absorbed
 function judge_absorbed(ray::Ray, crystal, d::Float64)::Bool
-    α = get_absorption_coefficient(ray, crystal)
+    α = get_absorption_coefficient(ray, crystal) + crystal.αb
     A = 1 - exp( -0.1α * d)     # probability to be absorbed while propagating a distance d [mm] *α is in [cm^-1]
+    return rand() <= A ? true : false
+end
+
+
+# judge if ray is scattered
+function judge_scattered(crystal, d::Float64)::Bool
+    A = 1 - exp( -0.1 * crystal.αs * d)
     return rand() <= A ? true : false
 end
 
@@ -431,6 +440,11 @@ function ray_tracing!(ray::Ray, crystal, Δd::Float64, max_count)::Bool
                     else
                         return false    # disappear
                     end
+                elseif judge_scattered(crystal, Δd)
+                    # if scattered
+                    redirect!(ray)
+                    flag = true
+                    break
                 else
                     # if not absorbed
                     forward!(ray, Δd)
@@ -446,6 +460,11 @@ function ray_tracing!(ray::Ray, crystal, Δd::Float64, max_count)::Bool
                 else
                     return false    # disappear
                 end
+            elseif judge_scattered(crystal, t - Δd * N)
+                # if scattered
+                redirect!(ray)
+                flag = true
+                break
             else
                 # if not absorbed
                 forward!(ray, t - N * Δd - SMALL)   # forward ray to a plane
