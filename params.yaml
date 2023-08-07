@@ -12,12 +12,12 @@ crystal:
   caxis: [1.0, 0.0, 0.0]  # vector specifying c(or Z)-axis (not used for isotropic crystal)
   shape: "cuboid"         # "cuboid" or "brewster". Brewster-cut assumes a beam propagating along z-axis
   angle: 90               # corner angle for reducing the symmetry of the crystal [deg.]
-  W: 2.5                  # width (along x) [mm]
-  H: 2.5                  # height (along y) [mm]
-  L: 7.5                  # length (along z) [mm]
-  QE: 1.0                 # internal quantum efficiency
-  alpha_b: 0.0            # background absorption coefficient [cm^-1]
-  alpha_s: 1e-2           # scattering coefficient [cm^-1]
+  W: 3.0                  # width (along x) [mm]
+  H: 3.0                  # height (along y) [mm]
+  L: 10.0                 # length (along z) [mm]
+  QE: 0.996               # internal quantum efficiency
+  alpha_b: 1.0e-4         # background absorption coefficient [cm^-1]
+  alpha_s: 0.0            # scattering coefficient [cm^-1]
 
 beam:
   distribution: "gauss"   # valid inputs: "gauss", "tophat"
