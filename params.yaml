@@ -23,7 +23,7 @@ beam:
   distribution: "gauss"   # valid inputs: "gauss", "tophat"
   wl: 1020.0              # excitation wavelength
   k: [0.0, 0.0, 1.0]      # vector specifying the beam direction
-  d: 0.5                  # beam diameter
+  d: 0.5                  # beam diameter (1/e^2 in the case of gaussian beam)
   p0: [1.25, 1.25, 0.0]   # point where the beam passes
   E: [1.0, 0.0, 0.0]      # polarization
 
