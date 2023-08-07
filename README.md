@@ -1,10 +1,10 @@
 Monte Carlo fluorescence ray tracing simulation for laser cooling of solids
 ===
-These simulation codes are to simulate the mean fluorescence wavelength and fluorescence escape efficiency of a bulk crystal by by Monte Carlo method.
+These simulation codes are to simulate the mean fluorescence wavelength and fluorescence escape efficiency of a bulk crystal by by Monte Carlo method. This repository is related to the following: Hiroki Tanaka and Stefan Püschel, "Monte Carlo fluorescence ray tracing simulation for laser cooling of solids," Optics Express (under review).
 
 ## Description
 - All the parameters for simulation are written in 'params.yaml'.
-- The simulation requires spectroscopic data of the crystal. The spectroscpic data need to be in the directory "spectra" in CSV format. The first column is wavelength in nm, the second column is the normalized fluorescence intensity, and the third column is the absorption cross section in cm^2.
+- The simulation requires spectroscopic data of the laser-cooling medium. The spectroscpic data need to be in the directory "spectra" in CSV format. The first column is wavelength in nm, the second column is the normalized fluorescence intensity, and the third column is the absorption cross section in cm^2.
 - The file name of the spectroscopic data needs to be named as "{crystal name}\_{temperature}K.csv" for isotropic crystals. For uniaxial crystals, two files for two polarizations are needed and they should be named as "{crystal name}\_{"sigma" or "pi"}\_{temperature}K.csv".
 - This simulation uses absorption cross section values derived from the fluorescence spectra using the reciprocity method, or McCumber theory, because the values at long wavelengths are more reliable than the values calculated from the measured transmission spectra using the nominal doping levels.
 - Although the shape of absortpion cross section spectra derived by the reciprocity method mostly shows a perfect agreement with those measured in transmission spectroscopy, we often observe a discrepancy in the values. Therefore, the correction coefficient 'correction_coeff' in the parameter file 'params.yaml' needs to be adjusted. In the case of Yb:YLF, we found a correction value to be 1.15 (the values from measurement are larger by a factor of 1.15 than the values derived by the reciprocity method).
