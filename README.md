@@ -8,6 +8,7 @@ These simulation codes are to simulate the mean fluorescence wavelength and fluo
 - The file name of the spectroscopic data needs to be named as "{crystal name}\_{temperature}K.csv" for isotropic crystals. For uniaxial crystals, two files for two polarizations are needed and they should be named as "{crystal name}\_{"sigma" or "pi"}\_{temperature}K.csv". The codes will be updated for simulating biaxial crystals in near future.
 - This simulation uses absorption cross section values derived from the fluorescence spectra using the reciprocity method, or McCumber theory, because the values at long wavelengths are more reliable than the values calculated from the measured transmission spectra using the nominal doping levels.
 - Although the shape of absortpion cross section spectra derived by the reciprocity method mostly shows a perfect agreement with those measured in transmission spectroscopy, we often observe a discrepancy in the values. Therefore, the correction coefficient 'correction_coeff' in the parameter file 'params.yaml' needs to be adjusted. In the case of Yb:YLF, we found a correction value to be 1.15 (the values from measurement are larger by a factor of 1.15 than the values derived by the reciprocity method).
+- 
 
 
 ## Requirement
@@ -24,7 +25,7 @@ Julia of v.1.8 or later is recommended (we developped the codes under v.1.8.3). 
    ```shell
    >julia -p 3
    ```
-3. Import packages: CSV, DataFrames, YAML, Distributions, Interpolations
+3. Import packages (only if not yet installed): CSV, DataFrames, YAML, Distributions, Interpolations
    ```julia
    pkg>add [package name]
    ```
@@ -49,7 +50,7 @@ Julia of v.1.8 or later is recommended (we developped the codes under v.1.8.3). 
 
 
 ## Reference
-[1] Hiroki Tanaka, Stefan Püschel, ...
+[1] Hiroki Tanaka and Stefan Püschel, "Monte Carlo fluorescence ray tracing simulation for laser cooling of solids," Optics Express (under review).
 
 
 [hirokitanaka-ikz](https://github.com/hirokitanaka-ikz)
