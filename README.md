@@ -56,7 +56,7 @@ Julia of v.1.8 or later is recommended (we developped the codes under v.1.8.3). 
 7. You can generate a report in pdf by running "report.ipynb".
 
 ## Licence
-[MIT](https://github.com/hirokitanaka-ikz/fluorescence_ray_tracing/main/LICENCE)
+[MIT](https://github.com/hirokitanaka-ikz/fluorescence_ray_tracing/main/LICENSE)
 
 
 ## Reference
