@@ -1,6 +1,6 @@
 Monte Carlo fluorescence ray tracing simulation for laser cooling of solids
 ===
-These codes are to simulate the mean fluorescence wavelength and fluorescence escape efficiency of a bulk crystal by the Monte Carlo method. This repository is linked to the following article: Hiroki Tanaka and Stefan Püschel, "Monte Carlo fluorescence ray tracing simulation for laser cooling of solids," Optics Express 32(2), 2306-2320 (2024) Optics Express. https://doi.org/10.1364/OE.503250
+These codes are to simulate the mean fluorescence wavelength and fluorescence escape efficiency of a bulk crystal by the Monte Carlo method. This repository is linked to the following article: Hiroki Tanaka and Stefan Püschel, "Monte Carlo fluorescence ray tracing simulation for laser cooling of solids," Optics Express 32(2), 2306-2320 (2024). https://doi.org/10.1364/OE.503250
 
 
 ## Description
