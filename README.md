@@ -60,7 +60,7 @@ Julia of v.1.8 or later is recommended (we developped the codes under v.1.8.3). 
 
 
 ## Reference
-[1] Hiroki Tanaka and Stefan Püschel, "Monte Carlo fluorescence ray tracing simulation for laser cooling of solids," Optics Express (under review).
+[1] Hiroki Tanaka and Stefan Püschel, "Monte Carlo fluorescence ray tracing simulation for laser cooling of solids," Optics Express 32(2), 2306-2320 (2024).
 
 
 [hirokitanaka-ikz](https://github.com/hirokitanaka-ikz)
