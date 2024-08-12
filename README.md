@@ -35,7 +35,7 @@ Julia of v.1.8 or later is recommended (we developped the codes under v.1.8.3). 
    ```shell
    >julia -p 3
    ```
-3. Import packages (only if not yet installed): CSV, DataFrames, YAML, Distributions, Interpolations
+3. Import packages (only if not yet installed): CSV, DataFrames, YAML, Distributions, Interpolations, OrderedCollections
    ```julia
    pkg>add [package name]
    ```
@@ -52,7 +52,7 @@ Julia of v.1.8 or later is recommended (we developped the codes under v.1.8.3). 
    ```julia
    main()
    ```
-6. Once the simulation finishes it creates a directory "result" and sub-folder named with the time-stamp containing a CSV file and param.yaml.
+6. Once the simulation finishes it creates a directory "result" and sub-folder named with the time-stamp containing a CSV file, log.txt, and param.yaml.
 7. You can generate a report in pdf by running "report.ipynb".
 
 ## Licence

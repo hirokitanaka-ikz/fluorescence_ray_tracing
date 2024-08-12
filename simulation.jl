@@ -46,7 +46,7 @@ function simulation(params)
         f = @spawn process(crystal, beam, Δd, max_ref_count, pump_depletion, m)
         push!(fs, f)
     end
-    println("*****Simulation start: $nproc process(es)*****")
+
     df_all = DataFrame()
     for (i, f) in enumerate(fs)
         df = fetch(f)
@@ -56,8 +56,6 @@ function simulation(params)
             df_all = vcat(df_all, df)
         end
     end
-    Nesc = size(df_all, 1)
-    println("fraction of escaping rays: $Nesc / $N => Fluorescence escape efficiency = $(Nesc / N * 100)%")
-    println("*****Simulation end*****")
+
     return df_all
 end
