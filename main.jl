@@ -38,7 +38,7 @@ function print_parameters(logfile, params)
         write_log(logfile, indent * "$key: $value")
     end
     write_log(logfile, "\n-----Simulation-----")
-    for (key, value) in params["crystal"]
+    for (key, value) in params["simulation"]
         write_log(logfile, indent * "$key: $value")
     end
     write_log(logfile, "*****(Parameters)*****")
@@ -96,4 +96,9 @@ function main()
     # save yaml (parameters)
     cp("params.yaml", "result/$dt/params.yaml")
     println("\nPROGRAM FINISH")
+end
+
+
+if abspath(PROGRAM_FILE) == @__FILE__
+    main()
 end
