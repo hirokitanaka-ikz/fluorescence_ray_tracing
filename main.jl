@@ -66,7 +66,7 @@ function main()
 
     # load parameters from yaml
     params = YAML.load_file("params.yaml", dicttype=OrderedDict{String, Any})
-    write_log(logfile, "*****Parameters*****")
+    write_log(logfile, "*****Parameters END*****")
     print_parameters(logfile, params)
 
     # run simulation
@@ -80,11 +80,11 @@ function main()
     write_log(logfile, "\n----------Result----------")
     write_log(logfile, "Escaping Fluorescence Rays: $Nesc / $N\nFluorescence Escape Efficiency = $(Nesc / N * 100)%")
     mean_wl_gen = mean(df.λgen)
-    std_wl_gen = std(df.λgen)
+    err_wl_gen = std(df.λgen) / sqrt(N)
     mean_wl_esc = mean(df.λesc)
-    std_wl_esc = std(df.λesc)
-    write_log(logfile, "Mean Fluorescence Wavelength (Generate): $mean_wl_gen +- $std_wl_gen nm")
-    write_log(logfile, "Mean Fluorescence Wavelength (Escape): $mean_wl_esc +- $std_wl_esc nm")
+    err_wl_esc = std(df.λesc) / sqrt(Nesc)
+    write_log(logfile, "Mean Fluorescence Wavelength (Generate): $mean_wl_gen +- $err_wl_gen nm")
+    write_log(logfile, "Mean Fluorescence Wavelength (Escape): $mean_wl_esc +- $err_wl_esc nm")
 
 
     # save csv (result)
