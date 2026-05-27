@@ -42,8 +42,8 @@ function create_crystal(params_crystal)
         return create_isotropic_crystal(params_crystal)
     elseif params_crystal["num_axes"] == 2
         return create_uniaxial_crystal(params_crystal)
-    # elseif params_crystal["num_axes"] == 3
-    #     return create_biaxial_crystal(params_crystal)
+    elseif params_crystal["num_axes"] == 3
+        return create_biaxial_crystal(params_crystal)
     else
         println("Number of axes has to be 1, 2, or 3!")
     end
