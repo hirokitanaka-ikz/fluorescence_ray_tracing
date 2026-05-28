@@ -38,3 +38,30 @@ struct Crystal_uniaxial
     αb::Float64     # background absorption coefficient [cm^-1]
     αs::Float64     # scattering coefficient [cm^-1]
 end
+
+
+struct Crystal_biaxial
+    W::Float64      # width [mm]
+    H::Float64      # height [mm]
+    L::Float64      # length [mm]
+    caxis::Vector{Float64}  # unit vector indicating the c-axis
+    baxis::Vector{Float64}  # unit vector indicating the b-axis
+    na ::Float64     # refractive index of smallest value
+    nb::Float64     # refractive index of intermediate value
+    nc::Float64     # refractive index of largest value
+    θ::Float64      # corner angle [rad]
+    T::Int64        # temperature [K]
+    conc::Float64   # doping concentration [cm^-3]
+    λ_vector::Vector{Float64}   # vector of wavelength [nm]
+    If_a::Vector{Float64}       # vector of fluorescence intensity for a-polarization [a.u.]
+    If_b::Vector{Float64}       # vector of fluorescence intensity for b-polarization [a.u.]
+    If_c::Vector{Float64}       # vector of fluorescence intensity for c-polarization [a.u.]
+    α_a::Vector{Float64}        # vector of absorption coefficient for a-polarization [cm^-1]
+    α_b::Vector{Float64}        # vector of absorption coefficient for b-polarization [cm^-1]
+    α_c::Vector{Float64}        # vector of absorption coefficient for c-polarization [cm^-1]
+    p_planes::Tuple{Vector{Float64}, Vector{Float64}, Vector{Float64}, Vector{Float64}, Vector{Float64}, Vector{Float64}}   # points (arbitrary) on each plane (order is 1:x=0, 2:x=W, 3:y=0, 4:y=H, 5:z=0, 6:z=L)
+    plane_normals::Tuple{Vector{Float64}, Vector{Float64}, Vector{Float64}, Vector{Float64}, Vector{Float64}, Vector{Float64}}  # normal vector of each palen
+    QE::Float64     # internal quantum efficiency
+    αb::Float64     # background absorption coefficient [cm^-1]
+    αs::Float64     # scattering coefficient [cm^-1]
+end
