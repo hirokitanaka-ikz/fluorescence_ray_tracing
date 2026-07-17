@@ -37,6 +37,25 @@ function load_spectra_uniaxial(name::String, T::Int64)::Tuple
 end
 
 
+# load fluorescence and absorption spectra of an uniaxial crystal with magnetic dipole transition
+function load_spectra_uniaxial_MD(name::String, T::Int64)::Tuple
+    filepath_π = "spectra/$(name)_pi_$(T)K.csv"
+    filepath_σ = "spectra/$(name)_sigma_$(T)K.csv"
+    filepath_α = "spectra/$(name)_alpha_$(T)K.csv"
+    df_π = CSV.read(filepath_π, header=1, DataFrame)
+    df_σ = CSV.read(filepath_σ, header=1, DataFrame)
+    df_α = CSV.read(filepath_α, header=1, DataFrame)
+    λ_vector::Vector{Float64} = df_π[:,1]
+    If_π::Vector{Float64} = df_π[:,2]
+    If_σ::Vector{Float64} = df_σ[:,2]
+    If_α::Vector{Float64} = df_α[:,2]
+    σabs_π::Vector{Float64} = df_π[:,3] # [cm^2]
+    σabs_σ::Vector{Float64} = df_σ[:,3] # [cm^2]
+    σabs_α::Vector{Float64} = df_α[:,3] # [cm^2]
+    return λ_vector, If_π, If_σ, If_α, σabs_π, σabs_σ, σabs_α
+end
+
+
 # load fluorescence and absorption spectra of an biaxial crystal
 function load_spectra_biaxial(name::String, T::Int64)::Tuple
     filepath_a = "spectra/$(name)_a_$(T)K.csv"
@@ -60,6 +79,11 @@ function create_crystal(params_crystal)
     if params_crystal["num_axes"] == 1
         return create_isotropic_crystal(params_crystal)
     elseif params_crystal["num_axes"] == 2
+        if params_crystal["magnetic_dipole"]
+            return create_uniaxial_crystal_MD(params_crystal)
+        else
+            return create_uniaxial_crystal(params_crystal)
+        end
         return create_uniaxial_crystal(params_crystal)
     elseif params_crystal["num_axes"] == 3
         return create_biaxial_crystal(params_crystal)
@@ -125,6 +149,38 @@ function create_uniaxial_crystal(params_crystal)::Crystal_uniaxial
     p_planes::Tuple = ([0, 0, 0], [W, 0, 0], [0, 0, 0], [0, H, 0], [0, 0, 0], [0, 0, L])
     plane_normals::Tuple = ([1, 0, 0], [-sin(ϕ), -cos(ϕ), 0], [0, 1, 0], [0, -1, 0], [-cos(θ), 0, sin(θ)], [cos(θ), 0, -sin(θ)])
     return Crystal_uniaxial(W, H, L, caxis, no, ne, θ, T, conc, λ_vector, If_π, If_σ, α_π, α_σ, p_planes, plane_normals, QE, alpha_b, alpha_s)
+end
+
+
+# define uniaxial crystal with magnetic dipole transition
+function create_uniaxial_crystal_MD(params_crystal)::Crystal_uniaxial_MD
+    name = params_crystal["name"]
+    T = params_crystal["T"]
+    no = params_crystal["n1"]
+    ne = params_crystal["n2"]
+    conc = params_crystal["cation_density"] * params_crystal["doping_level"] * params_crystal["correction_coeff"] / 100
+    W = params_crystal["W"]
+    H = params_crystal["H"]
+    L = params_crystal["L"]
+    caxis = params_crystal["caxis"]
+    QE = params_crystal["QE"]
+    alpha_b = params_crystal["alpha_b"]
+    alpha_s = params_crystal["alpha_s"]
+    if params_crystal["shape"] == "cuboid"
+        θ = 0.5π
+    elseif params_crystal["shape"] == "brewster"
+        θ = atan(ne)
+    else
+        println("crystal's shape is neither 'cuboid' nor 'brewster'!")
+    end
+    ϕ = params_crystal["angle"] / 180 * π
+    λ_vector, If_π, If_σ, If_α, σabs_π, σabs_σ, σabs_α = load_spectra_uniaxial_MD(name, T)
+    α_π::Vector{Float64} = σabs_π * conc
+    α_σ::Vector{Float64} = σabs_σ * conc
+    α_α::Vector{Float64} = σabs_α * conc
+    p_planes::Tuple = ([0, 0, 0], [W, 0, 0], [0, 0, 0], [0, H, 0], [0, 0, 0], [0, 0, L])
+    plane_normals::Tuple = ([1, 0, 0], [-sin(ϕ), -cos(ϕ), 0], [0, 1, 0], [0, -1, 0], [-cos(θ), 0, sin(θ)], [cos(θ), 0, -sin(θ)])
+    return Crystal_uniaxial_MD(W, H, L, caxis, no, ne, θ, T, conc, λ_vector, If_π, If_σ, If_α, α_π, α_σ, α_α, p_planes, plane_normals, QE, alpha_b, alpha_s)
 end
 
 
@@ -202,7 +258,7 @@ end
 
 
 # generate random wavelength from spectrum
-function get_fluorescence_wavelength(E::Vector{Float64}, crystal::Crystal_isotropic)::Float64
+function get_fluorescence_wavelength(k::Vector{Float64}, E::Vector{Float64}, crystal::Crystal_isotropic)::Float64
     λ = crystal.λ_vector
     spectrum = crystal.If
     spectrum /= maximum(spectrum)
@@ -218,10 +274,12 @@ end
 
 
 # generate random wavelength from spectrum
-function get_fluorescence_wavelength(E::Vector{Float64}, crystal::Crystal_uniaxial)::Float64
-    θ = acos( abs( dot(E, crystal.caxis) ) )
-    coeff_π = cos(θ) / (cos(θ) + sin(θ))
-    coeff_σ = 1 - coeff_π
+function get_fluorescence_wavelength(k::Vector{Float64}, E::Vector{Float64}, crystal::Crystal_uniaxial)::Float64
+    Ec = abs(dot(E, crystal.caxis))
+    Ea = sqrt(max(0.0, 1 - Ec^2))
+    R = Ec + Ea
+    coeff_π = Ec / R
+    coeff_σ = Ea / R
     λ = crystal.λ_vector
     spectrum = coeff_π * crystal.If_π + coeff_σ * crystal.If_σ
     spectrum /= maximum(spectrum)
@@ -236,14 +294,41 @@ function get_fluorescence_wavelength(E::Vector{Float64}, crystal::Crystal_uniaxi
 end
 
 
+# generate random wavelength from spectrum (uniaxial with MD)
+function get_fluorescence_wavelength(k::Vector{Float64}, E::Vector{Float64}, crystal::Crystal_uniaxial_MD)::Float64
+    H = normalize(cross(k, E))
+    Ec = abs(dot(E, crystal.caxis))
+    Ea = sqrt(max(0.0, 1 - Ec^2))
+    Hc = abs(dot(H, crystal.caxis))
+    Ha = sqrt(max(0.0, 1 - Hc^2))
+    R = Ec + Ea * Hc / (Ha + Hc) + Ea * Ha / (Ha + Hc)
+    coeff_π = Ec / R
+    coeff_σ = Ea * Hc / (Ha + Hc) / R
+    coeff_α = Ea * Ha / (Ha + Hc) / R
+    λ = crystal.λ_vector
+    spectrum = coeff_π * crystal.If_π + coeff_σ * crystal.If_σ + coeff_α * crystal.If_α
+    spectrum /= maximum(spectrum)
+    f = LinearInterpolation(λ, spectrum)
+    while true
+        λrand = rand(Uniform(λ[1], λ[end]))
+        Ifrand = rand()
+        if Ifrand < f(λrand)
+            return λrand
+        end
+    end
+end
+
+
 # generate random wavelength from spectrum
-function get_fluorescence_wavelength(E::Vector{Float64}, crystal::Crystal_biaxial)::Float64
-    θ = acos( abs( dot(E, crystal.caxis) ) )
-    ϕ = atan(abs( dot(E, crystal.baxis) ), abs(dot(E, cross(crystal.baxis, crystal.caxis)))) #def. in Spherical Coordinates; Error here
-    R = (cos(ϕ) * sin(θ) + sin(ϕ) * sin(θ) + cos(θ))
-    coeff_a = (cos(ϕ) * sin(θ)) / R #exchanged with coeff_c to correct geometry
-    coeff_b = (sin(ϕ) * sin(θ)) / R
-    coeff_c = cos(θ) / R #exchanged with coeff_a because stated above
+function get_fluorescence_wavelength(k::Vector{Float64}, E::Vector{Float64}, crystal::Crystal_biaxial)::Float64
+    aaxis = normalize(cross(crystal.baxis, crystal.caxis))
+    Ea = abs(dot(E, aaxis))
+    Eb = abs(dot(E, crystal.baxis))
+    Ec = abs(dot(E, crystal.caxis))
+    R = Ea + Eb + Ec
+    coeff_a = Ea / R
+    coeff_b = Eb / R
+    coeff_c = Ec / R
     λ = crystal.λ_vector
     spectrum = coeff_a * crystal.If_a + coeff_b * crystal.If_b + coeff_c * crystal.If_c
     spectrum /= maximum(spectrum)
@@ -312,7 +397,7 @@ end
 function generate_ray(crystal, beam::Beam, pump_depletion::Bool)::Ray
     k = generate_random_vector()
     E = generate_perpendicular_vector(k)
-    λ = get_fluorescence_wavelength(E, crystal)
+    λ = get_fluorescence_wavelength(k, E, crystal)
     ray_pos = get_ray_position(crystal, beam, pump_depletion)
     while !point_in_crystal(ray_pos, crystal)
         ray_pos = get_ray_position(crystal, beam, pump_depletion)
@@ -346,7 +431,7 @@ end
 
 # reset wavelength of ray
 function reset_wavelength!(ray::Ray, crystal)
-    ray.λ = get_fluorescence_wavelength(ray.E, crystal)
+    ray.λ = get_fluorescence_wavelength(ray.k, ray.E, crystal)
 end
 
 
@@ -384,6 +469,20 @@ function transmit!(ray::Ray, crystal::Crystal_uniaxial, normal::Vector{Float64})
 end
 
 
+# redirect the transmitted ray using Snell's law (uniaxial crystal)
+function transmit!(ray::Ray, crystal::Crystal_uniaxial_MD, normal::Vector{Float64})
+    θi = acos(dot(-normal, ray.k) / (norm(normal) * norm(ray.k)))   # indicent angle
+    if θi < SMALL
+        return ki
+    end
+    n = minimum([crystal.no, crystal.ne])
+    θo = asin(n * sin(θi))          # angle of refraction (Snell's law) using the average refractive index
+    Δθ = θo - θi
+    l = normalize( normal - dot(ray.k, normal) * ray.k )
+    ray.k = ray.k * cos(Δθ) + l * sin(Δθ)
+end
+
+
 # redirect the transmitted ray using Snell's law (biiaxial crystal)
 function transmit!(ray::Ray, crystal::Crystal_biaxial, normal::Vector{Float64})
     θi = acos(dot(-normal, ray.k) / (norm(normal) * norm(ray.k)))   # indicent angle
@@ -407,10 +506,29 @@ end
 
 # get absorption coefficient for fluorescence ray in cm^-1 (uniaxial crystal)
 function get_absorption_coefficient(ray::Ray, crystal::Crystal_uniaxial)::Float64
-    θ = acos( abs( dot(ray.E, crystal.caxis) ) )
-    coeff_π = cos(θ) / (cos(θ) + sin(θ))
-    coeff_σ = 1 - coeff_π
+    Ec = abs(dot(ray.E, crystal.caxis))
+    Ea = sqrt(max(0.0, 1 - Ec^2))
+    R = Ec + Ea
+    coeff_π = Ec / R
+    coeff_σ = Ea / R
     α = coeff_π * crystal.α_π + coeff_σ * crystal.α_σ
+    f = LinearInterpolation(crystal.λ_vector, α)
+    return f(ray.λ)
+end
+
+
+# get absorption coefficient for fluorescence ray in cm^-1 (uniaxial crystal)
+function get_absorption_coefficient(ray::Ray, crystal::Crystal_uniaxial_MD)::Float64
+    H = normalize(cross(ray.k, ray.E))
+    Ec = abs(dot(ray.E, crystal.caxis))
+    Ea = sqrt(max(0.0, 1 - Ec^2))
+    Hc = abs(dot(H, crystal.caxis))
+    Ha = sqrt(max(0.0, 1 - Hc^2))
+    R = Ec + Ea * Hc / (Ha + Hc) + Ea * Ha / (Ha + Hc)
+    coeff_π = Ec / R
+    coeff_σ = Ea * Hc / (Ha + Hc) / R
+    coeff_α = Ea * Ha / (Ha + Hc) / R
+    α = coeff_π * crystal.α_π + coeff_σ * crystal.α_σ + coeff_α * crystal.α_α
     f = LinearInterpolation(crystal.λ_vector, α)
     return f(ray.λ)
 end
@@ -439,10 +557,29 @@ end
 
 # get absorption coefficient for excitation beam in cm^-1 (uniaxial crystal)
 function get_absorption_coefficient(beam, crystal::Crystal_uniaxial)::Float64
-    θ = acos( abs( dot(beam.E, crystal.caxis) ) )
-    coeff_π = cos(θ) / (cos(θ) + sin(θ))
-    coeff_σ = 1 - coeff_π
+    Ec = abs(dot(beam.E, crystal.caxis))
+    Ea = sqrt(max(0.0, 1 - Ec^2))
+    R = Ec + Ea
+    coeff_π = Ec / R
+    coeff_σ = Ea / R
     α = coeff_π * crystal.α_π + coeff_σ * crystal.α_σ   # [cm^-1]
+    f = LinearInterpolation(crystal.λ_vector, α)
+    return f(beam.λ)
+end
+
+
+# get absorption coefficient for excitation beam in cm^-1 (uniaxial crystal)
+function get_absorption_coefficient(beam, crystal::Crystal_uniaxial_MD)::Float64
+    H = normalize(cross(beam.E, beam.k))
+    Ec = abs(dot(beam.E, crystal.caxis))
+    Ea = sqrt(max(0.0, 1 - Ec^2))
+    Hc = abs(dot(H, crystal.caxis))
+    Ha = sqrt(max(0.0, 1 - Hc^2))
+    R = Ec + Ea * Hc / (Ha + Hc) + Ea * Ha / (Ha + Hc)
+    coeff_π = Ec / R
+    coeff_σ = Ea * Hc / (Ha + Hc) / R
+    coeff_α = Ea * Ha / (Ha + Hc) / R
+    α = coeff_π * crystal.α_π + coeff_σ * crystal.α_σ + coeff_α * crystal.α_α   # [cm^-1]
     f = LinearInterpolation(crystal.λ_vector, α)
     return f(beam.λ)
 end
@@ -498,6 +635,43 @@ end
 
 # reflectivity of ray at a given plane (uniaxial)
 function get_reflectivity(ray::Ray, crystal::Crystal_uniaxial, normal::Vector{Float64})::Float64
+    θ = acos( abs( dot(ray.E, crystal.caxis) ) )    # angle of polarization with respect to c-axis
+    ratio_e = cos(θ) / (cos(θ) + sin(θ))
+    ratio_o = 1 - ratio_e
+
+    θi = acos(dot(-normal, ray.k) / (norm(normal) * norm(ray.k)))
+    # ordinary ray component (perpendicular to c-axis)
+    if θi > asin(1 / crystal.no)
+        Ro = 1.0
+    else
+        θo = asin(crystal.no * sin(θi))      # Snell's law
+        m = cross(ray.k, normal)            # vector normal to incident plane
+        θpol = acos(abs(dot(ray.E, m)))    # angle between E and m
+        ratio_Es = cos(θpol) / (cos(θpol) + sin(θpol))
+        ratio_Ep = 1 - ratio_Es
+        ts = 2 * sin(θo) * cos(θi) / sin(θi + θo)
+        tp = 2 * sin(θo) * cos(θi) / (sin(θi + θo) * cos(θi - θo))
+        Ro = 1 - tan(θi) / tan(θo) * (ratio_Es * ts^2 + ratio_Ep * tp^2)
+    end
+    # extraordinary ray component (parallel to c-axis)
+    if θi > asin(1 / crystal.ne)
+        Re = 1.0
+    else
+        θo = asin(crystal.ne * sin(θi))      # Snell's law
+        m = cross(ray.k, normal)            # vector normal to incident plane
+        θpol = acos(abs(dot(ray.E, m)))    # angle between E and m
+        ratio_Es = cos(θpol) / (cos(θpol) + sin(θpol))
+        ratio_Ep = 1 - ratio_Es
+        ts = 2 * sin(θo) * cos(θi) / sin(θi + θo)
+        tp = 2 * sin(θo) * cos(θi) / (sin(θi + θo) * cos(θi - θo))
+        Re = 1 - tan(θi) / tan(θo) * (ratio_Es * ts^2 + ratio_Ep * tp^2)
+    end
+    return Ro * ratio_o + Re * ratio_e
+end
+
+
+# reflectivity of ray at a given plane (uniaxial)
+function get_reflectivity(ray::Ray, crystal::Crystal_uniaxial_MD, normal::Vector{Float64})::Float64
     θ = acos( abs( dot(ray.E, crystal.caxis) ) )    # angle of polarization with respect to c-axis
     ratio_e = cos(θ) / (cos(θ) + sin(θ))
     ratio_o = 1 - ratio_e

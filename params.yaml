@@ -1,10 +1,11 @@
 crystal:
-  num_axes: 2             # number of individual optical axes, 1 -> isotropic, 2 -> uniaxial, 3 -> biaxial
-  name: "YbYLF"           # name of crystal
+  num_axes: 3             # number of individual optical axes, 1 -> isotropic, 2 -> uniaxial, 3 -> biaxial
+  magnetic_dipole: true   # true => magnetic dipole transition, false => no magnetic dipole transition
+  name: "YbYYF"           # name of crystal
   T: 300                  # temperature [K]
   n1: 1.45                # first refractive index, no in the case of crystal
   n2: 1.47                # second refractive index ne in the case of uniaxial crystal (not used for isotropic crystal)
-  n3:                     # refractive index for E||c (or E||Z) (only used for biaxial crystal)
+  n3: 1.50                 # refractive index for E||c (or E||Z) (only used for biaxial crystal)
   doping_level: 10.0      # doping level [%]
   correction_coeff: 1.15  # correction coefficient for abs. coefficient (>1 if the actual abs. coefficient is larger than the values calculated using cross section and doping level)
   cation_density: 1.4e22  # cation density of host [cm^-3]
@@ -24,11 +25,11 @@ beam:
   wl: 1020.0              # excitation wavelength
   k: [0.0, 0.0, 1.0]      # vector specifying the beam direction
   d: 0.5                  # beam diameter (1/e^2 in the case of gaussian beam)
-  p0: [1.25, 1.25, 0.0]   # point where the beam passes
+  p0: [1.5, 1.5, 0.0]     # point where the beam passes
   E: [1.0, 0.0, 0.0]      # polarization
 
 simulation:
-  N: 1e5                  # number of simulated fluorescence rays
+  N: 5e5                  # number of simulated fluorescence rays
   step: 0.5               # step size in ray tracing [mm]
   max_ref_count: 0        # max reflection counts to stop ray tracing (0 => infinity)
   pump_depletion: true    # false => no pump depletion (uniform excitation), true => pump delete (Beer-Lambert law)
